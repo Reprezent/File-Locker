@@ -5,6 +5,7 @@
 
 import java.lang.Math;
 import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.math.BigInteger;
@@ -14,6 +15,8 @@ import java.io.FileWriter;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Arrays;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 public class RSA {
 	private BigInteger N;
@@ -252,6 +255,51 @@ public class RSA {
 		writer.newLine();
 		
 		writer.close();
+	}
+
+	//signs the message using SHA256 hash, returns a BigInteger representing the signature
+	public void sign(String msgFile, String sigFile) throws java.security.NoSuchAlgorithmException, java.io.IOException{
+		Path path = Paths.get(msgFile);
+		byte[] msg = Files.readAllBytes(path);
+
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte[] hash = digest.digest(msg);
+
+		BigInteger hashed_int = new BigInteger(hash);
+
+		// computing H(m)^d mod N
+	    BigInteger mod = modPow.compute(hashed_int, d, N);	
+
+		BufferedWriter writer = new BufferedWriter(new FileWriter(sigFile));
+		writer.write(mod.toString());
+		writer.newLine();
+		writer.close();
+	}
+
+	public void validate(String msgFile, String sigFile) throws java.security.NoSuchAlgorithmException, java.io.IOException{
+		BufferedReader reader = new BufferedReader(new FileReader(sigFile));
+		BigInteger signature = new BigInteger(reader.readLine());
+		reader.close();
+
+		//computes signature^e mod N
+		BigInteger vt = modPow.compute(signature, e, N);
+
+		Path path = Paths.get(msgFile);
+		byte[] msg = Files.readAllBytes(path);
+
+		//hashing the message file and computing modN to verify the signature
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte[] hash = digest.digest(msg);
+		BigInteger tm = new BigInteger(hash);
+		tm = tm.mod(N);
+
+
+		//checking if the tag equals the hash of the original message
+		if(vt.equals(tm))
+			System.out.println("True");
+		else
+			System.out.println("False");
+
 	}
 
 }

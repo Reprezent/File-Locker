@@ -5,7 +5,7 @@
 class RSADec {
 	public RSADec(String [] args){
 		//creates a cmd line arg parser for enc/dec (false)
-		CommandLineArgParser cmd = new CommandLineArgParser(args, false);
+		RSACommandLineArgParser cmd = new RSACommandLineArgParser(args, false);
 
 		try{
 			RSA rsa = new RSA(cmd.getKeyFile(), false);

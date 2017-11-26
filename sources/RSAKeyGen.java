@@ -5,7 +5,7 @@
 class RSAKeyGen {
 	public RSAKeyGen(String [] args){
 		//creates a cmd line arg parser for key gen (true)
-		CommandLineArgParser cmd = new CommandLineArgParser(args, true);
+		RSACommandLineArgParser cmd = new RSACommandLineArgParser(args, true);
 
 		RSA rsa = new RSA(cmd.numBits());
 
