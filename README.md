@@ -30,7 +30,7 @@ The programs should recognize the following command line flags.
 
 
 #### Implementing CBC-MAC
-- Your task for this portion of the assignment is to correctly implement two integrity mechanisms: Hash-and-MAC and CBC-MAC.
+- Your task for this portion of the assignment is to correctly implement one integrity mechanism: CBC-MAC.
 - You will implement both tag generation and verification.
 - You are again allowed access to any implementation of the AES block cipher mode in **ECB unpadded mode** only.
 - With a working version of CBC encryption from assignment 1 this should be trivial. :smiley:
@@ -48,7 +48,7 @@ These executables should take the following argument flags:
 - The key file(s) your program generate from Programming Assignment 2 are close to digital certificates, but not quite there!
 - We want to upgrade them to full fledged digital certificates.
 - You should add behavior to your **rsa-keygen** from Programming Assignment 2 that will generate signatures on the thumbprint (hash) of the key file.
-- Your RSA key generation will need to be augmented to take as additional optional argument **-s** which maps to a private key that acts as a Certificate Authority for the generated public key.
+- Your RSA key generation will need to be augmented to take as additional optional argument **-c** which maps to a private key that acts as a Certificate Authority for the generated public key.
 - **If the argument is not given the generated key should sign itself** :rage:
 - The file storing the signature should be the same path as the public key except with **-casig** appended to the end.
 
