@@ -18,7 +18,7 @@ class CTREnc
 {
     public CTREnc(String[] args)
     {
-        CommandLineArgParser cmd_args = new CommandLineArgParser(args);
+        CBCCommandLineArgParser cmd_args = new CBCCommandLineArgParser(args);
         byte[] data = null, iv = null, key = null;
         try
         {

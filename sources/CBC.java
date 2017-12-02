@@ -5,6 +5,7 @@ import javax.crypto.spec.*;
 import java.security.*;
 import java.lang.Integer;
 import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 
 
 class CBC{
@@ -93,4 +94,27 @@ class CBC{
 		//unpad
 		return Padder.unpad(decrypted);
 	}
+
+    // IV || |m| ||
+    public static byte[] mac(byte[] mesg, byte[] key)
+    {
+        ByteBuffer buf = ByteBuffer.allocate(4);
+        byte[] message = new byte[mesg.length + Integer.BYTES];
+        buf.putInt(mesg.length);
+        byte[] length = buf.array();
+        int i;
+        for(i  = 0; i < length.length; i++)
+        {
+            message[i] = length[i];
+        }
+        for(int j = 0; j < mesg.length; j++)
+        {
+            message[i] = mesg[j];
+            i++;
+        }
+
+        byte[] rv = encrypt(message, key);
+
+        return rv;
+    }
 }

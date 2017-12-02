@@ -1,40 +1,43 @@
 // Richard Riedel, J.T. Liso, Sean Whalen
 // CS 583 Fall 2017
-// Programming Assignment 1
-//
+// Programming Assignment 3
+
 
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
 import java.lang.UnsupportedOperationException;
 import java.lang.SecurityException;
 
-class CBCDec
+class CBCMac
 {
-    public CBCDec(String[] args)
+    public CBCMac(String[] args)
     {
-        CBCCommandLineArgParser cmd_args = new CBCCommandLineArgParser(args);
+        CommandLineArgParser cmd_args = new CommandLineArgParser(args, "cbcmac");
         byte[] data = null, key = null, output = null;
         try
         {
-            data = Files.readAllBytes(cmd_args.getInputFile());
-            key = utils.hexStringToBinary(Files.readAllBytes(cmd_args.getKeyFile()));
+            data = Files.readAllBytes(Paths.get(cmd_args.getMsgFile()));
+            System.err.println("Data length: "+ Integer.toString(data.length));
+            key = utils.hexStringToBinary(Files.readAllBytes(Paths.get(cmd_args.getKeyFile())));
         }
         catch(IOException e) { System.err.println(e.getMessage()); }
         
-        output = CBC.decrypt(data, key);
+        output = CBC.mac(data, key);
+
+
 
         try
         {
-            Files.write(cmd_args.getOutputFile(), output);
+            Files.write(Paths.get(cmd_args.getMacFile()), output);
         }
         catch(IOException e)                   { System.err.println(e.getMessage()); }
         catch(UnsupportedOperationException e) { System.err.println(e.getMessage()); }
         catch(SecurityException e)             { System.err.println(e.getMessage()); }
-
     }
 
     public static void main(String[] args)
     {
-        new CBCDec(args);
+        new CBCMac(args);
     }
 }

@@ -10,9 +10,9 @@ import java.util.Map;
 import java.lang.StackTraceElement;
 import java.lang.Thread;
 
-class CommandLineArgParser
+class CBCCommandLineArgParser
 {
-    public CommandLineArgParser(String[] cmdopts)
+    public CBCCommandLineArgParser(String[] cmdopts)
     {
 		keyFile = null;
 		inputFile = null;

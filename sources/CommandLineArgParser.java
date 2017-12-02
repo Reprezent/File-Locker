@@ -58,6 +58,16 @@ class CommandLineArgParser
 					sigFile = cmdopts[++i];
 					break;
 
+                case "-t":
+					if((i+1) >= cmdopts.length){
+						System.err.println("ERROR: No tag file provided.");
+						System.exit(-1);
+						return;
+					}
+
+					macFile = cmdopts[++i];
+					break;
+
 				default:
 					System.err.println("Ignoring command line argument " + cmdopts[i]);
 					break;
@@ -74,6 +84,17 @@ class CommandLineArgParser
 			printValidateUsage();
 			System.exit(-1);
 		}
+        if((keyFile == null || msgFile == null || macFile == null) && vers.equals("cbcmac"))
+        {
+            printCBCMacUsage();
+            System.exit(-1);
+        }
+        if((keyFile == null || msgFile == null || macFile == null) && vers.equals("cbcvalidate"))
+        {
+            printCBCValidateUsage();
+            System.exit(-1);
+        }
+        
 
 	}
 
@@ -90,6 +111,7 @@ class CommandLineArgParser
 		System.err.println();
 	}
 
+
 	private void printValidateUsage(){
 		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
 		StackTraceElement main = stack[stack.length - 1];
@@ -100,6 +122,32 @@ class CommandLineArgParser
 		System.err.println("    -k <key-file>        Valid RSA public key file.");
 		System.err.println("    -m <message-file>        File to sign.");
 		System.err.println("    -s <signature-file>        File to store RSA signature.");
+		System.err.println();
+	}
+
+	private void printCBCMacUsage(){
+		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+		StackTraceElement main = stack[stack.length - 1];
+		String mainClass = main.getClassName();
+		System.err.print("usage: java " + mainClass);
+
+		System.err.println(" -k <key-file> -m <message-file> -t <tag-file>");
+		System.err.println("    -k <key-file>        Valid RSA private key file.");
+		System.err.println("    -m <message-file>        File to sign.");
+		System.err.println("    -t <tag-file>        File to write CBCMac tag to.");
+		System.err.println();
+	}
+
+	private void printCBCValidateUsage(){
+		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+		StackTraceElement main = stack[stack.length - 1];
+		String mainClass = main.getClassName();
+		System.err.print("usage: java " + mainClass);
+
+		System.err.println(" -k <key-file> -m <message-file> -t <tag-file>");
+		System.err.println("    -k <key-file>        Valid RSA private key file.");
+		System.err.println("    -m <message-file>        File to sign.");
+		System.err.println("    -t <tag-file>        File to read CBCMac tag.");
 		System.err.println();
 	}
 	public boolean hasKeyFile()
@@ -135,8 +183,20 @@ class CommandLineArgParser
 		return sigFile;
 	}
 
+
+    public boolean hasMacFile()
+    {
+        return macFile != null;
+    }
+
+    public String getMacFile()
+    {
+        return macFile;
+    }
+
 	private String opts;
 	private String keyFile;
 	private String msgFile;
 	private String sigFile;
+    private String macFile;
 }
