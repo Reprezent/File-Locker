@@ -26,6 +26,8 @@ public class RSA {
 	private BigInteger e;
 	private BigInteger d;
 
+	private String ca;
+
 	//reads in key file and generates RSA class based on that
 	RSA(String path, boolean enc) throws java.io.IOException{
 		BufferedReader reader = new BufferedReader(new FileReader(path));
@@ -64,7 +66,8 @@ public class RSA {
 	}
 
 	//generates RSA with n bits for N
-	RSA(int n){
+	RSA(int n, String auth){
+		ca = auth;
 		numBits = n;
 		SecureRandom rand = new SecureRandom();
 
@@ -300,6 +303,21 @@ public class RSA {
 		else
 			System.out.println("False");
 
+	}
+
+	public void casign(String pubKeyFile, String secKeyFile) throws java.io.IOException, java.security.NoSuchAlgorithmException{
+		String sigFile = pubKeyFile + "-casig";
+
+		BufferedWriter writer = new BufferedWriter(new FileWriter(sigFile));
+		
+		//user provided cert authority
+		if(ca != null){
+			RSA caRSA = new RSA(ca, false);
+			caRSA.sign(pubKeyFile, sigFile);
+		}else{ //sign itself
+			RSA caRSA = new RSA(secKeyFile, false);
+			caRSA.sign(pubKeyFile, sigFile);
+		}
 	}
 
 }

@@ -20,6 +20,7 @@ class RSACommandLineArgParser
 		pubKeyFile =  null;
 		secKeyFile = null;
 		numBits = -1;
+		authority = null;
 
 		int i;
 
@@ -94,6 +95,17 @@ class RSACommandLineArgParser
 					numBits = Integer.parseInt(cmdopts[++i]);
 					break;
 
+				case "-c":
+					if((i+1) >= cmdopts.length)
+                    {
+                        System.err.println("ERROR: No number of bits provided.");
+                        System.exit(-1);
+						return;
+                    }
+					
+					authority = cmdopts[++i];
+					break;
+
 				default:
 					System.err.println("Ignoring command line argument " + cmdopts[i]);
 					break;
@@ -142,10 +154,11 @@ class RSACommandLineArgParser
         String mainClass = main.getClassName();
         System.err.print("usage: java " + mainClass);
 		
-        System.err.println(" -p <publickey-file> -s <secretkey-file> -n <number-of-bits>");
+        System.err.println(" -p <publickey-file> -s <secretkey-file> -n <number-of-bits> [-c <certificate-authority>]");
         System.err.println("    -p <publickey-file>        Specifies the file to store the public key.");
         System.err.println("    -s <secretkey-file>        Specifies the file to store the private key.");
         System.err.println("    -n <number-of-bits>        Specifies the number of bits in your N.");
+        System.err.println("    -c <certificate-authority>        Specifies the file to serve as your CA. (optional)");
         System.err.println();
 	}
 
@@ -263,6 +276,14 @@ class RSACommandLineArgParser
         return numBits;
     }
 
+	public boolean hasAuthority(){
+		return authority == null;
+	}
+
+	public String authority(){
+		return authority;
+	}
+
 
     private String opts;
 	private String keyFile;
@@ -271,4 +292,5 @@ class RSACommandLineArgParser
 	private String pubKeyFile;
 	private String secKeyFile;
 	private int numBits;
+	private String authority;
 }
