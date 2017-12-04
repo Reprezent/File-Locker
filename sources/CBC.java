@@ -117,4 +117,29 @@ class CBC{
 
         return rv;
     }
+
+    public static byte[] validate(byte[] mesg, byte[] key, byte[] validation)
+    {
+        ByteBuffer buf = ByteBuffer.allocate(4);
+        byte[] message = new byte[mesg.length + Integer.BYTES];
+        byte[] iv = Arrays.copyOf(validation, 16);
+        buf.putInt(mesg.length);
+        byte[] length = buf.array();
+        int i;
+        for(i  = 0; i < length.length; i++)
+        {
+            message[i] = length[i];
+        }
+        for(int j = 0; j < mesg.length; j++)
+        {
+            message[i] = mesg[j];
+            i++;
+        }
+
+
+        byte[] rv = encrypt(message, key, iv);
+
+        return rv;
+    }
+
 }

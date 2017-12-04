@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.io.IOException;
 import java.lang.UnsupportedOperationException;
 import java.lang.SecurityException;
+import java.lang.Boolean;
 
 class CBCMac
 {
@@ -19,6 +20,9 @@ class CBCMac
         {
             data = Files.readAllBytes(Paths.get(cmd_args.getMsgFile()));
             System.err.println("Data length: "+ Integer.toString(data.length));
+            System.err.println("Key File? " + Boolean.toString(cmd_args.hasKeyFile()));
+            key = Files.readAllBytes(Paths.get(cmd_args.getKeyFile()));
+            System.err.println("Key length: "+ Integer.toString(key.length));
             key = utils.hexStringToBinary(Files.readAllBytes(Paths.get(cmd_args.getKeyFile())));
         }
         catch(IOException e) { System.err.println(e.getMessage()); }

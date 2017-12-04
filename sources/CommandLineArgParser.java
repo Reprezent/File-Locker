@@ -106,8 +106,8 @@ class CommandLineArgParser
 
 		System.err.println(" -k <key-file> -m <message-file> -s <signature-file>");
 		System.err.println("    -k <key-file>        Valid RSA private key file.");
-		System.err.println("    -m <message-file>        File to sign.");
-		System.err.println("    -s <signature-file>        File to store RSA signature.");
+		System.err.println("    -m <message-file>    File to sign.");
+		System.err.println("    -s <signature-file>  File to store RSA signature.");
 		System.err.println();
 	}
 
@@ -120,8 +120,8 @@ class CommandLineArgParser
 
 		System.err.println(" -k <key-file> -m <message-file> -s <signature-file>");
 		System.err.println("    -k <key-file>        Valid RSA public key file.");
-		System.err.println("    -m <message-file>        File to sign.");
-		System.err.println("    -s <signature-file>        File to store RSA signature.");
+		System.err.println("    -m <message-file>    File to sign.");
+		System.err.println("    -s <signature-file>  File to store RSA signature.");
 		System.err.println();
 	}
 
@@ -133,7 +133,7 @@ class CommandLineArgParser
 
 		System.err.println(" -k <key-file> -m <message-file> -t <tag-file>");
 		System.err.println("    -k <key-file>        Valid RSA private key file.");
-		System.err.println("    -m <message-file>        File to sign.");
+		System.err.println("    -m <message-file>    File to sign.");
 		System.err.println("    -t <tag-file>        File to write CBCMac tag to.");
 		System.err.println();
 	}
@@ -145,8 +145,8 @@ class CommandLineArgParser
 		System.err.print("usage: java " + mainClass);
 
 		System.err.println(" -k <key-file> -m <message-file> -t <tag-file>");
-		System.err.println("    -k <key-file>        Valid RSA private key file.");
-		System.err.println("    -m <message-file>        File to sign.");
+		System.err.println("    -k <key-file>        Valid CBC key file.");
+		System.err.println("    -m <message-file>    File to sign.");
 		System.err.println("    -t <tag-file>        File to read CBCMac tag.");
 		System.err.println();
 	}

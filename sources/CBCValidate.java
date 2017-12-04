@@ -13,6 +13,7 @@ class CBCValidate
 {
     public CBCValidate(String[] args)
     {
+        
         CommandLineArgParser cmd_args = new CommandLineArgParser(args, "cbcvalidate");
         byte[] data = null, key = null, output = null, mac = null;
         try
@@ -24,7 +25,7 @@ class CBCValidate
         }
         catch(IOException e) { System.err.println(e.getMessage()); }
         
-        output = CBC.mac(data, key);
+        output = CBC.validate(data, key, mac);
         boolean rv = Arrays.equals(output, mac);
         System.out.println(rv);
     }
@@ -34,7 +35,7 @@ class CBCValidate
 
     public static void main(String[] args)
     {
-        new CBCMac(args);
+        new CBCValidate(args);
     }
 }
 
