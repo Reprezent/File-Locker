@@ -8,6 +8,7 @@ import java.lang.UnsupportedOperationException;
 import java.lang.SecurityException;
 import java.util.Arrays;
 import java.nio.file.Paths;
+import java.lang.Boolean;
 
 class CBCValidate
 {
@@ -27,7 +28,7 @@ class CBCValidate
         
         output = CBC.validate(data, key, mac);
         boolean rv = Arrays.equals(output, mac);
-        System.out.println(rv);
+        System.out.println(((rv == true) ? "True" : "False"));
     }
 
 
