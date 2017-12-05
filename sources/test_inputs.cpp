@@ -4,7 +4,7 @@
 // This file tests key sizes that are stored int he directory tests/public_keys, tests/private_keys.
 // It uses inputs stored in tests/inputs. The file names will be stored in numerical format with 
 // whatever file extension.
-// This is mainly used EXTENSIVELY test our rsa-dec and rsa-enc.
+// This is mainly used EXTENSIVELY test our cbcmac-validate/cbcmac-tag
 
 #include <dirent.h>
 #include <stdio.h>
@@ -18,6 +18,11 @@
 #include <signal.h>
 #include <unistd.h>
 #include <iomanip>
+#include <tuple>
+#include <utility>
+#include <chrono>
+#include <cstring>
+#include <fcntl.h>
 
 using namespace std;
 
@@ -82,28 +87,74 @@ bool compare_files(const std::string& filename1, const std::string& filename2)
 
 int main(int argc, char** argv)
 {
-    const char* test_dir_name = "tests/inputs";
-    const char* pub_key_dir_name = "tests/public_keys";
-    const char* pri_key_dir_name = "tests/private_keys";
-    string encr_dir_name = "tests/encrypted_files/";
-    string outputs_dir_name = "tests/outputs/";
-    string command_builder;
-
-    int startingBits = 40;
-
-    if(argc == 2)
+    if(strcmp(argv[1], "--help") == 0)
     {
-        startingBits = stoi(argv[1]);
+        cout << "usage: " << argv[0] << " <numTests>" << endl;
+        return 0;
     }
 
+    const char* inputs_dir_name = "tests/CBCInputs";
+    const char* key_dir_name = "tests/CBCKeys";
+    string tag_dir_name = "tests/tags/";
+    string command_builder;
+
+    unsigned int numTests = 40;
+
+    if(argc >= 2)
+    {
+        numTests = stoi(argv[1]);
+    }
+
+
+    // Make directories fo they dont exist. 
+    mkdir("tests/tags", 0700);
+    mkdir(inputs_dir_name, 0700);
+    mkdir(key_dir_name, 0700);
+
     map<unsigned int, string> inputs;
-    map<unsigned int, string> pub_keys;
-    map<unsigned int, string> pri_keys;
+    map<unsigned int, string> keys;
+    // input, key, tag
+    multimap<string, tuple<string, string>> used;
 
     loadIntoMap(test_dir_name, inputs);
-    loadIntoMap(pub_key_dir_name, pub_keys);
-    loadIntoMap(pri_key_dir_name, pri_keys);
+    loadIntoMap(key_dir_name, keys);
 
+
+    string tag_file;
+    int rv;
+    int inputs_num, keys_num;
+    mt19937 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+    map<unsigned int, string>::iterator mit;
+    for(unsigned int i = 0; i < numTests; i++)
+    {
+        inputs_num = rng() % inputs.size();
+        keys_num = rng() % keys.size();
+
+        tag_file = tag_dir_name + to_string((inputs.begin() + inputs_num)->first) + "-" + to_string((keys.begin() + keys_num)->first);
+
+        // Make sure there are no duplicates
+        if(access(tag_file.c_str(), F_OK) == -1)
+        {
+            tag_file.append(".0");
+            int j = 1;
+            while(access(tag_file.c_str(), F_OK) == -1)
+            {
+                tag_file.erase(tag_file.find_first_of('.'));
+                tag_file.append("." + to_string(j));
+                j++;
+            }
+        }
+
+
+
+        // Want a 1 in 7 chance to compare two that are different
+        if(used.size() && 
+        
+
+
+    }
+
+#if 0
     string enc_file, output_file;
     int rv;
     map<unsigned int, string>::iterator mit, upper_bound;
@@ -182,21 +233,9 @@ int main(int argc, char** argv)
         cout << "      PASSED" << endl;
         remove(output_file.c_str());
         remove(enc_file.c_str());
-        /*
-           cout << "Key Size: " << i.first << endl;
-           for(map<unsigned int, string>::iterator it = inputs.begin(); it != upper_bound; it++)
-           {
-           cout << "   Input Size: " << it->first << endl;
-           }
-           */
     }
 
 
-    /*
-       for(pair<const unsigned int, string>& i : inputs)
-       {
-       cout << i.first << " has value " << i.second << endl;
-       }
-       */
     return 0;        
+#endif
 }
