@@ -11,6 +11,21 @@ class FileLocker {
 	}
 
 
+    public byte[] genKey()
+    {
+        return new byte[1];
+    }
+
+    public boolean verifyKey(byte[] privKey, byte[] pubKey)
+    {
+
+        return true;
+    }
+
+    public void Nothing()
+    {
+    }
+
 	private String directory;
 	private String pubKeyFile;
 	private String privKeyFile;
