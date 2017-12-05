@@ -319,7 +319,7 @@ public class RSA {
         {
             signature = new BigInteger(Files.readAllBytes(sigFile));
         }
-        catch(IOException) { System.err.println(e); }
+        catch(IOException e) { System.err.println(e); }
 
 		//computes signature^e mod N
 		BigInteger vt = modPow.compute(signature, public_key.getFactor(), public_key.getN());

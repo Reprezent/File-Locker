@@ -76,13 +76,15 @@ class FileLocker {
         {
             // For each file encrypt them and then replace them with thier own file.
             files.filter(x -> !x.endsWith(".sig")) // Remove all signature fileSA
-            .filter(x -> { pub.validate(x, Paths.get(x.toString + ".sig"); }); // Remove all files that actully validate.
+            .filter(x -> { return pub.validate(x, Paths.get(x.toString() + ".sig")); }); // Remove all files that actully validate.
 
-            if(!files.empty())
+            if(files.count() != 0)
             {
                 System.err.println("ERROR: Files do not validate");
-                for(Path file : files)
-                    System.err.println("    " + file.toString() + "    FAILED");
+                files.forEach( x ->
+                {
+                    System.err.println("    " + x.toString() + "    FAILED");
+                });
 
                 System.exit(1);
             }
@@ -104,7 +106,7 @@ class FileLocker {
             // Obviously dumb if im encrypting other signature files.
             // Proper way to do this would be to have a signature->file manifest.
             files.filter(x -> x.endsWith(".sig")) // Remove all non signature files
-            .forEach(Files::delete) // Delete all files
+            .forEach(x -> { try { Files.delete(x); } catch(IOException e) { System.err.println(e); } }); // Delete all files
         }
         catch(IOException e)
         {
@@ -191,7 +193,7 @@ class FileLocker {
     {
         String sig = Key + "-casig";
         RSA ver = new RSA(verifyKey, true);
-        return ver.validateB(key, sig);
+        return ver.validateB(Key, sig);
     }
 
     private static char[] toHex(byte[] msg)
@@ -219,6 +221,13 @@ class FileLocker {
         {
             System.err.println(e);
         }
+    }
+
+
+    public byte[] decryptKey()
+    {
+       return null; 
+            
     }
 
     private RSA priv, pub, verify;
