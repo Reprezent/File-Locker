@@ -9,12 +9,9 @@ class RSAKeyGen {
 
 		RSA rsa = new RSA(cmd.numBits(), cmd.authority());
 
-		try{
 			rsa.writepubKey(cmd.pubKeyFile());
 			rsa.writesecKey(cmd.secKeyFile());
 			rsa.casign(cmd.pubKeyFile(), cmd.secKeyFile());
-		}catch(java.io.IOException e) { System.err.println(e.getMessage()); 
-		}catch(java.security.NoSuchAlgorithmException e) { System.err.println(e.getMessage()); }
 	}
 
 	public static void main(String[] args){

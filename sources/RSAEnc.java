@@ -7,10 +7,8 @@ class RSAEnc {
 		//creates a cmd line arg parser for enc/dec (false)
 		RSACommandLineArgParser cmd = new RSACommandLineArgParser(args, false);
 
-		try{
 			RSA rsa = new RSA(cmd.getKeyFile(), true);
 			rsa.encrypt(cmd.getInputFile(), cmd.getOutputFile());
-		}catch(java.io.IOException e) { System.err.println(e.getMessage()); }
 	}
 
 	public static void main(String[] args){

@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import java.util.Arrays;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.nio.charset.StandardCharsets;
 
 public class RSA {
@@ -172,7 +173,7 @@ public class RSA {
     }
 
 
-	public void encrypt(String input, String output) throws java.io.IOException {
+	public void encrypt(String input, String output){
 		BigInteger msg = new BigInteger(readFile(input));
         BigInteger encrypted = encrypt(msg);
 
@@ -267,12 +268,31 @@ public class RSA {
         }
 	}
 
-	//signs the message using SHA256 hash, returns a BigInteger representing the signature
-	public void sign(String msgFile, String sigFile) throws java.security.NoSuchAlgorithmException, java.io.IOException{
-		Path path = Paths.get(msgFile);
-		byte[] msg = Files.readAllBytes(path);
+	public void sign(String msgFile, String sigFile)
+    {
+        sign(Paths.get(msgFile), Paths.get(sigFile));
+	}
 
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+    // Signs the message using SHA256 hash, returns a BigInteger representing the signature
+    public void sign(Path msgFile, Path sigFile)
+    {
+		byte[] msg = null;
+        try
+        {
+            msg = Files.readAllBytes(msgFile);
+        }
+        catch(IOException e) { System.err.println(e); }
+
+		MessageDigest digest = null;
+        try
+        {
+            digest = MessageDigest.getInstance("SHA-256");
+        }
+        catch(NoSuchAlgorithmException e)
+        {
+            System.err.println(e);
+            System.exit(1);
+        }
 		byte[] hash = digest.digest(msg);
 
 		BigInteger hashed_int = new BigInteger(hash);
@@ -280,20 +300,30 @@ public class RSA {
 		// computing H(m)^d mod N
 	    BigInteger mod = modPow.compute(hashed_int, private_key.getFactor(), private_key.getN());	
 
-        writeFile(sigFile, mod.toString());
-	}
+        try { Files.write(sigFile, mod.toByteArray()); }
+        catch(IOException e) { System.err.println(e); }
 
-	public void validate(String msgFile, String sigFile) throws java.security.NoSuchAlgorithmException, java.io.IOException{
+    }
+
+
+	public void validate(String msgFile, String sigFile)
+    {
 		BigInteger signature = new BigInteger(readFile(sigFile));
 
 		//computes signature^e mod N
 		BigInteger vt = modPow.compute(signature, public_key.getFactor(), public_key.getN());
 
-		Path path = Paths.get(msgFile);
-		byte[] msg = Files.readAllBytes(path);
+		byte[] msg = null;
+        try
+        {
+            msg = Files.readAllBytes(Paths.get(msgFile));
+        }
+        catch(IOException e) { System.err.println(e); }
 
 		//hashing the message file and computing modN to verify the signature
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		MessageDigest digest = null;
+        try { digest = MessageDigest.getInstance("SHA-256"); }
+        catch(NoSuchAlgorithmException e) { System.err.println(e); }
 		byte[] hash = digest.digest(msg);
 		BigInteger tm = new BigInteger(hash);
 		tm = tm.mod(public_key.getN());
@@ -307,7 +337,8 @@ public class RSA {
 
 	}
 
-	public void casign(String pubKeyFile, String secKeyFile) throws java.io.IOException, java.security.NoSuchAlgorithmException{
+	public void casign(String pubKeyFile, String secKeyFile)
+    {
 		String sigFile = pubKeyFile + "-casig";
 
 		//user provided cert authority
