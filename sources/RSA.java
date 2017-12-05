@@ -306,7 +306,7 @@ public class RSA {
     }
 
 
-    public boolean validate(String msgFile, String sigFile)
+    public boolean validateB(String msgFile, String sigFile)
     {
         return validate(Paths.get(msgFile), Paths.get(sigFile));
     }

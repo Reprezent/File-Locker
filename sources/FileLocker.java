@@ -33,7 +33,7 @@ class FileLocker {
     {
         this.key = genKey();
 
-        if(!verifyKey(privKeyFile, pubKeyFile))
+        if(!verifyKey(pubKeyFile, validateKey))
         {
             System.err.println("ERROR: Key pairing not valid.\n Exiting...");
             System.exit(1);
@@ -55,7 +55,7 @@ class FileLocker {
     void unlock()
     {
         this.key = decryptKey();
-        if(!verifyKey(privKeyFile, pubKeyFile))
+        if(!verifyKey(pubKeyFile, validateKey))
         {
             System.err.println("ERROR: Key pairing not valid.\n Exiting...");
             System.exit(1);
@@ -75,7 +75,7 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file encrypt them and then replace them with thier own file.
-            files.filter(x -> !x.endsWith(".sig")) // Remove all signature files
+            files.filter(x -> !x.endsWith(".sig")) // Remove all signature fileSA
             .filter(x -> { pub.validate(x, Paths.get(x.toString + ".sig"); }); // Remove all files that actully validate.
 
             if(!files.empty())
@@ -101,6 +101,8 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file encrypt them and then replace them with thier own file.
+            // Obviously dumb if im encrypting other signature files.
+            // Proper way to do this would be to have a signature->file manifest.
             files.filter(x -> x.endsWith(".sig")) // Remove all non signature files
             .forEach(Files::delete) // Delete all files
         }
@@ -185,20 +187,11 @@ class FileLocker {
     }
 
 
-    // After readint eh writeup this doesn't sound right,
-    // but I honestly cannot understand what the writeup is saying
-    // anyways.
-    public boolean verifyKey(String privKey, String pubKey)
+    public boolean verifyKey(String Key, String verifyKey)
     {
-        SecureRandom rand = new SecureRandom();
-        byte[] buf = new byte[Math.min(32, priv.getNumberOfBits() - 56) / 8];
-        rand.nextBytes(buf);
-        BigInteger a = new BigInteger(buf);
-
-        BigInteger temp = pub.encrypt(a);
-        BigInteger cmp = priv.encrypt(temp);
-
-        return temp == a;
+        String sig = Key + "-casig";
+        RSA ver = new RSA(verifyKey, true);
+        return ver.validateB(key, sig);
     }
 
     private static char[] toHex(byte[] msg)
@@ -228,7 +221,7 @@ class FileLocker {
         }
     }
 
-    private RSA priv, pub;
+    private RSA priv, pub, verify;
     private String manifestFile;
 	private String directory;
 	private String pubKeyFile;
