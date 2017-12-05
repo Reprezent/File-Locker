@@ -226,8 +226,15 @@ class FileLocker {
 
     public byte[] decryptKey()
     {
-       return null; 
+        BigInteger decrypted = null;
+        try
+        {
+            decrypted = priv.decrypt(new BigInteger(Files.readAllBytes(Paths.get(manifestFile))));
+        }
+        catch(IOException e) { System.err.println(e); }
+        
             
+        return decrypted.toByteArray();
     }
 
     private RSA priv, pub, verify;
