@@ -52,6 +52,90 @@ class FileLocker {
         signAllFiles();
     }
 
+    void unlock()
+    {
+        this.key = decryptKey();
+        if(!verifyKey(privKeyFile, pubKeyFile))
+        {
+            System.err.println("ERROR: Key pairing not valid.\n Exiting...");
+            System.exit(1);
+        }
+        
+        priv = new RSA(privKeyFile, false);
+        pub = new RSA(pubKeyFile, true);
+
+        verifyAllFiles();
+        removeAllTags();
+        decryptAllFiles();
+    }
+
+    void verifyAllFiles()
+    {
+
+        try(Stream<Path> files = Files.walk(Paths.get(directory)))
+        {
+            // For each file encrypt them and then replace them with thier own file.
+            files.filter(x -> !x.endsWith(".sig")) // Remove all signature files
+            .filter(x -> { pub.validate(x, Paths.get(x.toString + ".sig"); }); // Remove all files that actully validate.
+
+            if(!files.empty())
+            {
+                System.err.println("ERROR: Files do not validate");
+                for(Path file : files)
+                    System.err.println("    " + file.toString() + "    FAILED");
+
+                System.exit(1);
+            }
+            
+        }
+        catch(IOException e)
+        {
+            System.err.println(e);
+        }
+
+
+    }
+
+    void removeAllTags()
+    {
+        try(Stream<Path> files = Files.walk(Paths.get(directory)))
+        {
+            // For each file encrypt them and then replace them with thier own file.
+            files.filter(x -> x.endsWith(".sig")) // Remove all non signature files
+            .forEach(Files::delete) // Delete all files
+        }
+        catch(IOException e)
+        {
+            System.err.println(e);
+        }
+    }
+
+
+    void decryptAllFiles()
+    {
+        try(Stream<Path> files = Files.walk(Paths.get(directory)))
+        {
+            // For each file encrypt them and then replace them with thier own file.
+            files.forEach(x ->
+            { 
+                try
+                {
+                    Files.write(x, CBC.decrypt(Files.readAllBytes(x), this.key));
+                }
+                catch(IOException e)
+                {
+                    System.err.println(e);
+                }
+                
+            });
+            
+        }
+        catch(IOException e)
+        {
+            System.err.println(e);
+        }
+
+    }
     void encryptAllFiles()
     {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
@@ -84,7 +168,7 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file sign the file and store it in file_name.sig
-            files.forEach(x -> { priv.sign(x, Paths.get(x.toFile().getName() + ".sig")); });
+            files.forEach(x -> { priv.sign(x, Paths.get(x.toString() + ".sig")); });
         }
         catch(IOException e)
         {
