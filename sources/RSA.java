@@ -114,6 +114,7 @@ public class RSA {
         }
     }
 
+
     public BigInteger encrypt(BigInteger msg)
     {
 		SecureRandom rand = new SecureRandom();
@@ -318,5 +319,13 @@ public class RSA {
 			caRSA.sign(pubKeyFile, sigFile);
 		}
 	}
+
+    public int getNumberOfBits()
+    {
+        if(private_key == null)
+            return public_key.getNumberOfBits();
+        else
+            return private_key.getNumberOfBits();
+    }
 
 }
