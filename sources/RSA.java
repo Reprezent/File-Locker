@@ -114,11 +114,9 @@ public class RSA {
         }
     }
 
-	public void encrypt(String input, String output) throws java.io.IOException {
+    public BigInteger encrypt(BigInteger msg)
+    {
 		SecureRandom rand = new SecureRandom();
-
-		BigInteger msg = new BigInteger(readFile(input));
-
 		// Padding.
 		byte [] m = msg.toByteArray();
 
@@ -137,7 +135,7 @@ public class RSA {
 
 		if (message.length > public_key.getNumberOfBits()/8) {
 			System.err.println("ERROR: message length exceeds N length, try a larger key or smaller message\n");
-			return;
+			return null;
 		}
 		
 		// make sure no random byte is 0x00
@@ -169,16 +167,20 @@ public class RSA {
 		// Use our own modPow implementation.
 		BigInteger encrypted = modPow.compute(padded, public_key.getFactor(), public_key.getN()); //padded.modPow(e,N);
 
+        return encrypted;
+    }
+
+
+	public void encrypt(String input, String output) throws java.io.IOException {
+		BigInteger msg = new BigInteger(readFile(input));
+        BigInteger encrypted = encrypt(msg);
+
 		// Writing encrypted message.
         writeFile(output, encrypted.toString());
 	}
 
-	public void decrypt(String input, String output)
+    public BigInteger decrypt(BigInteger msg)
     {
-		String currLine = readFile(input);
-
-		BigInteger msg = new BigInteger(currLine);
-		
 		//decrypting using our own modPow implemenation
 		BigInteger decrypted = modPow.compute(msg, private_key.getFactor(), private_key.getN()); //msg.modPow(d, N);
 		//System.err.println(decrypted.toString());
@@ -187,7 +189,7 @@ public class RSA {
 		byte [] padded = decrypted.toByteArray();
 		if (padded.length < 3) {
 			System.err.println("ERROR: decrypted message is empty, no decryption written");
-			return;
+			return null;
 		}
 		//System.out.println(Integer.toString(padded.length));
 		// skip the FIRST byte, why not first two (0x00 and 0x02)?
@@ -205,6 +207,16 @@ public class RSA {
 		// anyway
 		byte [] m = Arrays.copyOfRange(padded, i, padded.length);
 		BigInteger decUnpadded  = new BigInteger(m);
+        
+
+        return decUnpadded;
+    }
+	public void decrypt(String input, String output)
+    {
+		String currLine = readFile(input);
+
+		BigInteger msg = new BigInteger(currLine);
+        BigInteger decUnpadded = decrypt(msg);
 
 		// Writing decrypted message.
         writeFile(output, decUnpadded.toString());
