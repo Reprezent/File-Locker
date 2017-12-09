@@ -77,7 +77,7 @@ public class RSA {
         private_key = new RSAKey(N, d, n);
 	}
 
-    private String readFile(String input_file)
+    public String readFile(String input_file)
     {
 		String currLine = null;
         try(BufferedReader reader = new BufferedReader(new FileReader(input_file)))
@@ -185,7 +185,6 @@ public class RSA {
     {
 		//decrypting using our own modPow implemenation
 		BigInteger decrypted = modPow.compute(msg, private_key.getFactor(), private_key.getN()); //msg.modPow(d, N);
-		//System.err.println(decrypted.toString());
 
 		//unpadding
 		byte [] padded = decrypted.toByteArray();
@@ -193,7 +192,7 @@ public class RSA {
 			System.err.println("ERROR: decrypted message is empty, no decryption written");
 			return null;
 		}
-		//System.out.println(Integer.toString(padded.length));
+		// System.out.println(Integer.toString(padded.length));
 		// skip the FIRST byte, why not first two (0x00 and 0x02)?
 		// answer: the prepended 0x00 byte disappears 
 		// with conversion to bigInt bc it has 

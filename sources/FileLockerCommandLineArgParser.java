@@ -92,11 +92,12 @@ class FileLockerCommandLineArgParser
 		System.err.print("usage: java " + mainClass);
 
 		System.err.println(" -d <directory> -p <public-key> -r <private-key> -vk <validating-public-key>");
-		System.err.println("    -d <directory>        Directory to lock or unlock");
-		System.err.println("    -p <action public key>      Public RSA Key");
-		System.err.println("    -r <action private key>        Private RSA Key");
+		System.err.println("    -d <directory>                     Directory to lock or unlock");
+		System.err.println("    -p <action public key>             Public RSA Key");
+		System.err.println("    -r <action private key>            Private RSA Key");
 		System.err.println("    -vk <validating public key>        RSA key to validatie public RSA Key");
 		System.err.println();
+        System.exit(1);
 	}
 
 	public boolean hasDirectory()

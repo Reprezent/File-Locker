@@ -7,6 +7,7 @@ class Locker {
 		FileLockerCommandLineArgParser cmd = new FileLockerCommandLineArgParser(args);
 
 		FileLocker locker = new FileLocker(cmd.getDirectory(), cmd.getPubKeyFile(), cmd.getPrivKeyFile(), cmd.getValidateKey());
+        locker.lock();
 	}
 
 	public static void main(String[] args){

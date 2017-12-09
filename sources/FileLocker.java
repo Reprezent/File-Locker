@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.util.Arrays;
+
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
@@ -22,6 +24,7 @@ import java.security.NoSuchAlgorithmException;
 
 class FileLocker {
 	public FileLocker(String d, String p, String pr, String v){
+        System.err.println("Starting...");
 		directory = d;
 		pubKeyFile = p;
 		privKeyFile = pr;
@@ -31,13 +34,18 @@ class FileLocker {
 
     void lock()
     {
+        System.err.print("Generating Key");
         this.key = genKey();
+        System.err.println("Key Length: " + Integer.toString(this.key.length));
+        System.err.println("    Done");
 
+        System.err.print("Verifying Key");
         if(!verifyKey(pubKeyFile, validateKey))
         {
             System.err.println("ERROR: Key pairing not valid.\n Exiting...");
             System.exit(1);
         }
+        System.err.println("    Done");
         
         priv = new RSA(privKeyFile, false);
         pub = new RSA(pubKeyFile, true);
@@ -54,19 +62,34 @@ class FileLocker {
 
     void unlock()
     {
+        System.err.print("Decrypting Key...");
+        priv = new RSA(privKeyFile, false);
         this.key = decryptKey();
+        removeKey();
+        System.err.println("    Done.");
+        System.err.println("Key Length: " + Integer.toString(this.key.length));
+        System.err.print("Verifying Key...");
         if(!verifyKey(pubKeyFile, validateKey))
         {
             System.err.println("ERROR: Key pairing not valid.\n Exiting...");
             System.exit(1);
         }
-        
-        priv = new RSA(privKeyFile, false);
+        System.err.println("    Done.");
+
         pub = new RSA(pubKeyFile, true);
 
+        
+        System.err.println("Verifying Files...");
         verifyAllFiles();
+        System.err.println("    Done.");
+
+        System.err.println("Removing Tags...");
         removeAllTags();
+        System.err.println("    Done.");
+
+        System.err.print("Decrypting Files...");
         decryptAllFiles();
+        System.err.println("    Done.");
     }
 
     void verifyAllFiles()
@@ -75,13 +98,23 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file encrypt them and then replace them with thier own file.
-            files.filter(x -> !x.endsWith(".sig")) // Remove all signature fileSA
-            .filter(x -> { return pub.validate(x, Paths.get(x.toString() + ".sig")); }); // Remove all files that actully validate.
+            long i = 
+            files
+            .filter(Files::isRegularFile)
+            .filter(x -> { return !x.toString().startsWith(manifestFile); })
+            .filter(x -> !x.getFileName().toString().endsWith(".sig")) // Remove all signature fileSA
+            .filter(x -> { return !pub.validate(x, Paths.get(x.toString() + ".sig")); })  // Remove all files that actully validate.
+            .count();
 
-            if(files.count() != 0)
+            if(i != 0)
             {
                 System.err.println("ERROR: Files do not validate");
-                files.forEach( x ->
+                Files.walk(Paths.get(directory))
+                .filter(Files::isRegularFile)
+                .filter(x -> { return !x.toString().startsWith(manifestFile); })
+                .filter(x -> !x.getFileName().toString().endsWith(".sig")) // Remove all signature fileSA
+                .filter(x -> { return !pub.validate(x, Paths.get(x.toString() + ".sig")); })  // Remove all files that actully validate.
+                .forEach( x ->
                 {
                     System.err.println("    " + x.toString() + "    FAILED");
                 });
@@ -105,7 +138,7 @@ class FileLocker {
             // For each file encrypt them and then replace them with thier own file.
             // Obviously dumb if im encrypting other signature files.
             // Proper way to do this would be to have a signature->file manifest.
-            files.filter(x -> x.endsWith(".sig")) // Remove all non signature files
+            files.filter(x -> x.getFileName().toString().endsWith(".sig")) // Remove all non signature files
             .forEach(x -> { try { Files.delete(x); } catch(IOException e) { System.err.println(e); } }); // Delete all files
         }
         catch(IOException e)
@@ -120,7 +153,11 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file encrypt them and then replace them with thier own file.
-            files.forEach(x ->
+            files
+            .filter(Files::isRegularFile)
+            .filter(x -> !x.getFileName().toString().endsWith(".sig")) // Remove all signature fileSA
+            .filter(x -> { return !x.getFileName().toString().startsWith(manifestFile); })
+            .forEach(x ->
             { 
                 try
                 {
@@ -145,7 +182,11 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file encrypt them and then replace them with thier own file.
-            files.forEach(x ->
+            files
+            .filter(Files::isRegularFile)
+            .filter(x -> !x.getFileName().toString().endsWith(".sig")) // Remove all signature fileSA
+            .filter(x -> { System.err.println(x.toString().endsWith(manifestFile)); return !x.toString().endsWith(manifestFile); })
+            .forEach(x ->
             { 
                 try
                 {
@@ -172,7 +213,11 @@ class FileLocker {
         try(Stream<Path> files = Files.walk(Paths.get(directory)))
         {
             // For each file sign the file and store it in file_name.sig
-            files.forEach(x -> { priv.sign(x, Paths.get(x.toString() + ".sig")); });
+            files
+            .filter(Files::isRegularFile)
+            .filter(x -> !x.getFileName().toString().endsWith(".sig")) // Remove all signature fileSA
+            .filter(x -> { return !x.getFileName().toString().startsWith(manifestFile); })
+            .forEach(x -> { priv.sign(x, Paths.get(x.toString() + ".sig")); });
         }
         catch(IOException e)
         {
@@ -227,15 +272,17 @@ class FileLocker {
     public byte[] decryptKey()
     {
         BigInteger decrypted = null;
-        try
-        {
-            decrypted = priv.decrypt(new BigInteger(Files.readAllBytes(Paths.get(manifestFile))));
-        }
-        catch(IOException e) { System.err.println(e); }
+        decrypted = priv.decrypt(new BigInteger(priv.readFile(manifestFile)));
         
             
-        return decrypted.toByteArray();
+        return Arrays.copyOf(decrypted.toByteArray(), AES.blocksize());
     }
+
+    public void removeKey()
+    {
+            try { Files.delete(Paths.get(manifestFile)); } catch(IOException e) { System.err.println(e); }
+    }
+
 
     private RSA priv, pub, verify;
     private String manifestFile;
