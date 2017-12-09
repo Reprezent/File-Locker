@@ -25,7 +25,6 @@ import java.security.NoSuchAlgorithmException;
 
 class FileLocker {
 	public FileLocker(String d, String p, String pr, String v){
-        System.err.println("Starting...");
 		directory = d;
 		pubKeyFile = p;
 		privKeyFile = pr;
@@ -35,21 +34,12 @@ class FileLocker {
 
     void lock()
     {
-        System.err.print("Generating Key");
         this.key = genKey();
-        for(byte i : key)
-            System.err.print(String.format("%02X", i));
-        System.err.println();
-        System.err.println("Key Length: " + Integer.toString(this.key.length));
-        System.err.println("    Done");
-
-        System.err.print("Verifying Key");
         if(!verifyKey(pubKeyFile, validateKey))
         {
             System.err.println("ERROR: Key pairing not valid.\n Exiting...");
             System.exit(1);
         }
-        System.err.println("    Done");
         
         priv = new RSA(privKeyFile, false);
         pub = new RSA(pubKeyFile, true);
@@ -66,37 +56,23 @@ class FileLocker {
 
     void unlock()
     {
-        System.err.print("Decrypting Key...");
         priv = new RSA(privKeyFile, false);
         this.key = decryptKey();
-        for(byte i : key)
-            System.err.print(String.format("%02X", i));
-        System.err.println();
         removeKey();
-        System.err.println("    Done.");
-        System.err.println("Key Length: " + Integer.toString(this.key.length));
-        System.err.print("Verifying Key...");
         if(!verifyKey(pubKeyFile, validateKey))
         {
             System.err.println("ERROR: Key pairing not valid.\n Exiting...");
             System.exit(1);
         }
-        System.err.println("    Done.");
 
         pub = new RSA(pubKeyFile, true);
 
         
-        System.err.println("Verifying Files...");
         verifyAllFiles();
-        System.err.println("    Done.");
 
-        System.err.println("Removing Tags...");
         removeAllTags();
-        System.err.println("    Done.");
 
-        System.err.print("Decrypting Files...");
         decryptAllFiles();
-        System.err.println("    Done.");
     }
 
     void verifyAllFiles()
@@ -192,7 +168,7 @@ class FileLocker {
             files
             .filter(Files::isRegularFile)
             .filter(x -> !x.getFileName().toString().endsWith(".sig")) // Remove all signature fileSA
-            .filter(x -> { System.err.println(x.toString().endsWith(manifestFile)); return !x.toString().endsWith(manifestFile); })
+            .filter(x -> { return !x.toString().endsWith(manifestFile); })
             .forEach(x ->
             { 
                 try
@@ -280,21 +256,14 @@ class FileLocker {
         try{
         decrypted = priv.decrypt(new BigInteger(Files.readAllBytes(Paths.get(manifestFile))));
         }catch(IOException e) {}
-        System.err.println("DECRYPT KEY");
         
         
         byte[] temp = decrypted.toByteArray();
-        for(byte i : temp)
-            System.err.format("%02X", i);
-        System.err.println();
         if(temp.length == 17 && temp[0] == 0x00)
         {
             // Remove Null Byte?
             temp = Arrays.copyOfRange(temp, 1, 17);
         }
-        for(byte i : temp)
-            System.err.format("%02X", i);
-        System.err.println();
             
         return Arrays.copyOf(temp, AES.blocksize());
     }
