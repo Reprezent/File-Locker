@@ -24,6 +24,7 @@ class FileLockerCommandLineArgParser
 		{
 			System.err.println("ERROR: Need to specify command line arguments.");
 			printLockerUsage();
+			System.exit(-1);
 		}
 
 		//parsing list of command options
