@@ -101,7 +101,7 @@ public class RSA {
         return currLine;
     }
 
-    private void writeFile(String output_file, String output)
+    public void writeFile(String output_file, String output)
     {
 
         try(BufferedWriter writer = new BufferedWriter(new FileWriter(output_file)))

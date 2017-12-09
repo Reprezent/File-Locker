@@ -48,7 +48,13 @@ class Padder
     static public byte[] unpad(byte[] data)
     {	
         System.err.println("Data length: " + Integer.toString(data.length));
-        System.err.println("Pad Length: " + Byte.toString(data[data.length - 1]));
+        System.err.println("Pad Length: " + Integer.toString(data[data.length - 1]));
+        System.err.print("[ ");
+        for(byte i : data)
+        {
+            System.err.print((char)i + ", ");
+        }
+        System.err.print("]");
 		return Arrays.copyOf(data, data.length - data[data.length-1]);
     }
 }

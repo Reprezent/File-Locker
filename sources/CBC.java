@@ -11,17 +11,17 @@ import java.nio.ByteBuffer;
 class CBC{
 
 	public static byte[] encrypt(byte[] msg, byte[] key, byte[] iv) {
-        System.err.println("Msg length: " + Integer.toString(msg.length));
-		System.err.println("IV length: " + Integer.toString(iv.length));
+        // System.err.println("Msg length: " + Integer.toString(msg.length));
+		// System.err.println("IV length: " + Integer.toString(iv.length));
         byte[] padded_msg = Padder.pad(msg, AES.blocksize());
         // Prepend IV
 		byte[] encrypted_msg = Arrays.copyOf(iv, padded_msg.length + iv.length);
 		byte[] cipher = iv;
         byte[] buffer = new byte[AES.blocksize()];
 
-        System.err.println("padded_msg length: " + Integer.toString(padded_msg.length));
-		System.err.println("encrypted_msg length: " + Integer.toString(encrypted_msg.length));
-        System.err.println("Buffer length: " + Integer.toString(buffer.length));
+        // System.err.println("padded_msg length: " + Integer.toString(padded_msg.length));
+		// System.err.println("encrypted_msg length: " + Integer.toString(encrypted_msg.length));
+        // System.err.println("Buffer length: " + Integer.toString(buffer.length));
 
 		// block-chaining
 		for(int i = AES.blocksize(); i-AES.blocksize() < padded_msg.length; i+=AES.blocksize()){
@@ -33,8 +33,8 @@ class CBC{
                 }
                 catch(ArrayIndexOutOfBoundsException e)
                 {
-                    System.err.println("I is " + Integer.toString(i));
-                    System.err.println("J is " + Integer.toString(j));
+                    // System.err.println("I is " + Integer.toString(i));
+                    // System.err.println("J is " + Integer.toString(j));
                     System.exit(-1);
                 }
 			}
@@ -64,7 +64,7 @@ class CBC{
 
 	public static byte[] decrypt(byte[] msg, byte[] key) {
 		byte[] decrypted =  new byte[msg.length - AES.blocksize()];
-        System.err.println("Msg length: " + Integer.toString(msg.length));
+        // System.err.println("Msg length: " + Integer.toString(msg.length));
 		
         byte[] cipher = Arrays.copyOf(msg, AES.blocksize());
     

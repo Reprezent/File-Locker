@@ -14,6 +14,7 @@ import java.io.FileReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import java.io.FileOutputStream;
 import java.util.Arrays;
 
 
@@ -36,6 +37,9 @@ class FileLocker {
     {
         System.err.print("Generating Key");
         this.key = genKey();
+        for(byte i : key)
+            System.err.print(String.format("%02X", i));
+        System.err.println();
         System.err.println("Key Length: " + Integer.toString(this.key.length));
         System.err.println("    Done");
 
@@ -65,6 +69,9 @@ class FileLocker {
         System.err.print("Decrypting Key...");
         priv = new RSA(privKeyFile, false);
         this.key = decryptKey();
+        for(byte i : key)
+            System.err.print(String.format("%02X", i));
+        System.err.println();
         removeKey();
         System.err.println("    Done.");
         System.err.println("Key Length: " + Integer.toString(this.key.length));
@@ -257,10 +264,8 @@ class FileLocker {
     public void writeKey()
     {
         BigInteger enc_key = pub.encrypt(new BigInteger(key));
-        try(BufferedWriter writer = new BufferedWriter(new FileWriter(manifestFile)))
-        {
-		    writer.write(enc_key.toString());
-		    writer.newLine();
+        try (FileOutputStream fos = new FileOutputStream(manifestFile)) {
+               fos.write(enc_key.toByteArray());
         }
         catch(IOException e)
         {
@@ -272,10 +277,26 @@ class FileLocker {
     public byte[] decryptKey()
     {
         BigInteger decrypted = null;
-        decrypted = priv.decrypt(new BigInteger(priv.readFile(manifestFile)));
+        try{
+        decrypted = priv.decrypt(new BigInteger(Files.readAllBytes(Paths.get(manifestFile))));
+        }catch(IOException e) {}
+        System.err.println("DECRYPT KEY");
         
+        
+        byte[] temp = decrypted.toByteArray();
+        for(byte i : temp)
+            System.err.format("%02X", i);
+        System.err.println();
+        if(temp.length == 17 && temp[0] == 0x00)
+        {
+            // Remove Null Byte?
+            temp = Arrays.copyOfRange(temp, 1, 17);
+        }
+        for(byte i : temp)
+            System.err.format("%02X", i);
+        System.err.println();
             
-        return Arrays.copyOf(decrypted.toByteArray(), AES.blocksize());
+        return Arrays.copyOf(temp, AES.blocksize());
     }
 
     public void removeKey()
