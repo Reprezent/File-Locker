@@ -24,6 +24,7 @@ class FileLockerCommandLineArgParser
 		{
 			System.err.println("ERROR: Need to specify command line arguments.");
 			printLockerUsage();
+			System.exit(-1);
 		}
 
 		//parsing list of command options
@@ -95,7 +96,7 @@ class FileLockerCommandLineArgParser
 		System.err.println("    -d <directory>        Directory to lock or unlock");
 		System.err.println("    -p <action public key>      Public RSA Key");
 		System.err.println("    -r <action private key>        Private RSA Key");
-		System.err.println("    -vk <validating public key>        RSA key to validatie public RSA Key");
+		System.err.println("    -vk <validating public key>        RSA key to validate public RSA Key");
 		System.err.println();
 	}
 
