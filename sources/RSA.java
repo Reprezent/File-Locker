@@ -295,10 +295,17 @@ public class RSA {
         }
 		byte[] hash = digest.digest(msg);
 
+        // System.err.print("SIGN| Hash: ");
+        // System.err.println(hash);
+
 		BigInteger hashed_int = new BigInteger(hash);
+        // System.err.print("SIGN| Hashed Int: ");
+        // System.err.println(hashed_int);
 
 		// computing H(m)^d mod N
 	    BigInteger mod = modPow.compute(hashed_int, private_key.getFactor(), private_key.getN());	
+        // System.err.print("SIGN| modPow: ");
+        // System.err.println(mod);
 
         try { Files.write(sigFile, mod.toByteArray()); }
         catch(IOException e) { System.err.println(e); }
@@ -331,10 +338,13 @@ public class RSA {
         }
         catch(IOException e) { System.err.println(e); }
 
+
 		//hashing the message file and computing modN to verify the signature
 		MessageDigest digest = null;
         try { digest = MessageDigest.getInstance("SHA-256"); }
         catch(NoSuchAlgorithmException e) { System.err.println(e); }
+
+
 		byte[] hash = digest.digest(msg);
 		BigInteger tm = new BigInteger(hash);
 		tm = tm.mod(public_key.getN());
@@ -344,10 +354,16 @@ public class RSA {
 
 	public void validate(String msgFile, String sigFile)
     {
-		BigInteger signature = new BigInteger(readFile(sigFile));
+		BigInteger signature = null;
+        try{ signature = new BigInteger(Files.readAllBytes(Paths.get(sigFile))); }
+        catch(IOException e) { System.err.println(e); }
+        // System.err.print("VALIDATE| File read in:");
+        // System.err.println(signature);
 
 		//computes signature^e mod N
 		BigInteger vt = modPow.compute(signature, public_key.getFactor(), public_key.getN());
+        // System.err.print("VALIDATE| Decrypted sig:");
+        // System.err.println(vt);
 
 		byte[] msg = null;
         try
@@ -360,8 +376,13 @@ public class RSA {
 		MessageDigest digest = null;
         try { digest = MessageDigest.getInstance("SHA-256"); }
         catch(NoSuchAlgorithmException e) { System.err.println(e); }
+
+
 		byte[] hash = digest.digest(msg);
+
+
 		BigInteger tm = new BigInteger(hash);
+        // System.err.println(tm);
 		tm = tm.mod(public_key.getN());
 
 
